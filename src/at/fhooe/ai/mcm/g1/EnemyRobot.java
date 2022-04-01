@@ -72,6 +72,13 @@ public class EnemyRobot{
 		return name;
 	}
 
+	@Override
+	public String toString() {
+		return "EnemyRobot [bearing=" + bearing + ", bearingRadians=" + bearingRadians + ", distance=" + distance
+				+ ", energy=" + energy + ", heading=" + heading + ", headingRadians=" + headingRadians + ", name="
+				+ name + ", velocity=" + velocity + "]";
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -96,6 +103,7 @@ public class EnemyRobot{
 		this.headingRadians = event.getHeadingRadians();
 		this.name = event.getName();
 		this.velocity = event.getVelocity();
+		System.out.print(this.toString());
 	}
 
 }

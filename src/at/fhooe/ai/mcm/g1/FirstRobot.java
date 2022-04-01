@@ -1,6 +1,7 @@
 package at.fhooe.ai.mcm.g1;
 
 import robocode.AdvancedRobot;
+import robocode.ScannedRobotEvent;
 
 public class FirstRobot extends AdvancedRobot {
 	@Override
@@ -16,4 +17,10 @@ public class FirstRobot extends AdvancedRobot {
 		
 	}
 
+	
+	@Override
+	public void onScannedRobot(ScannedRobotEvent event) {
+		EnemyRobot r1 = new EnemyRobot(event);
+		
+	}
 }
