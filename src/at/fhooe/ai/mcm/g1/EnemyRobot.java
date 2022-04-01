@@ -124,6 +124,20 @@ public class EnemyRobot{
 	public void setScannedY(int scannedY) {
 		this.scannedY = scannedY;
 	}
+	
+	public void setEnemyRobot(ScannedRobotEvent event, double X, double Y) {
+		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
+		this.bearing = event.getBearing();
+		this.bearingRadians = event.getBearingRadians();
+		this.distance = event.getDistance();
+		this.energy = event.getEnergy();
+		this.heading = event.getHeading();
+		this.headingRadians = event.getHeadingRadians();
+		this.name = event.getName();
+		this.velocity = event.getVelocity();
+		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
+		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
+	}
 
 	public EnemyRobot(ScannedRobotEvent event, double X, double Y) {
 		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
@@ -137,7 +151,6 @@ public class EnemyRobot{
 		this.velocity = event.getVelocity();
 		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
 		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
-
 	}
 
 }

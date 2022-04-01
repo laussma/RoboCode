@@ -27,7 +27,7 @@ public class FirstRobot extends AdvancedRobot {
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// TODO Auto-generated method stub
 		super.onScannedRobot(event);
-		this.r = new EnemyRobot(event, getX(), getY());
+		this.r.setEnemyRobot(event, getX(), getY());
 		
 	}
 	
