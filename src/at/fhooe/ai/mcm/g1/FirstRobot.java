@@ -15,8 +15,8 @@ public class FirstRobot extends AdvancedRobot {
 		setTurnRadarRight(Double.POSITIVE_INFINITY);
 
 		while(true) {
-			ahead(100);
-			turnLeft(90);
+			ahead(70);
+			turnLeft(30);
 		}
 		
 	}
@@ -28,19 +28,22 @@ public class FirstRobot extends AdvancedRobot {
 		double time = 1; // 1 tick
 		
 		double distanceEnemyTurn = r1.getVelocity() * time;
+		
 		double XEnemyNew = r1.getScannedX() + Math.sin(r1.getAngle()) * distanceEnemyTurn;
 		double YEnemyNew = r1.getScannedY() + Math.cos(r1.getAngle()) * distanceEnemyTurn;
 		
 		double distanceBullet = Math.sqrt(Math.pow(XEnemyNew - getX(), 2) + Math.pow(YEnemyNew - getY(), 2));
 		
 		double angleBarrelRotation = Math.acos((XEnemyNew - getX()) / distanceBullet);
+		angleBarrelRotation += getHeadingRadians() - getGunHeadingRadians(); 
 		
 		double power = (distanceBullet / time - 20) / (-3);
-		// TODO Auto-generated method stub
-		super.onScannedRobot(event);
-		this.r.setEnemyRobot(event, getX(), getY());
 		
-		turnGunLeft(angleBarrelRotation); //might change it to not always use left rotation
+		//super.onScannedRobot(event);
+		//this.r.setEnemyRobot(event, getX(), getY());
+		//System.out.println(angleBarrelRotation);
+	
+		turnGunLeftRadians(angleBarrelRotation); //might change it to not always use left rotation
 		fire(power);
 	}
 	
