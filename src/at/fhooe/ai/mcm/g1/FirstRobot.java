@@ -13,6 +13,10 @@ public class FirstRobot extends AdvancedRobot {
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setTurnRadarRight(Double.POSITIVE_INFINITY);
+		
+		/*if(getGunTurnRemaining() == 0) {
+			fire(1);
+		}*/
 
 		while(true) {
 			ahead(70);
@@ -42,9 +46,27 @@ public class FirstRobot extends AdvancedRobot {
 		//super.onScannedRobot(event);
 		//this.r.setEnemyRobot(event, getX(), getY());
 		//System.out.println(angleBarrelRotation);
+		
+		if(getGunTurnRemaining() == 0) {
+			/*if(XEnemyNew - getX() > 0 && YEnemyNew - getY() > 0) {
+				turnGunLeftRadians(angleBarrelRotation);
+			} else if(XEnemyNew - getX() > 0 && YEnemyNew - getY() < 0) {
+				turnGunRightRadians(angleBarrelRotation);
+			} else if(XEnemyNew - getX() < 0 && YEnemyNew - getY() > 0) {
+				turnGunRightRadians(angleBarrelRotation);
+			} else {
+				turnGunLeftRadians(angleBarrelRotation);
+			}*/
+			
+			turnGunLeftRadians(angleBarrelRotation);
+			
+			fire(power);
+		}
+		
 	
-		turnGunLeftRadians(angleBarrelRotation); //might change it to not always use left rotation
-		fire(power);
+		 //might change it to not always use left rotation
+		//fire(power);
+		//execute();
 	}
 	
 	public void onPaint(java.awt.Graphics2D g) {
