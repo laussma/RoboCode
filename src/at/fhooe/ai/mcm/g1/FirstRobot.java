@@ -9,6 +9,8 @@ import java.awt.geom.Point2D;
 
 import robocode.AdvancedRobot;
 import robocode.DeathEvent;
+import robocode.HitByBulletEvent;
+import robocode.HitRobotEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 
@@ -107,7 +109,14 @@ public class FirstRobot extends AdvancedRobot {
 	public void onRobotDeath(RobotDeathEvent event) {
 		se.removeThreat(event.getName());
 	}
-	
+
+	@Override
+	public void onHitByBullet(HitByBulletEvent event) {
+		EnemyRobot enemy = se.threatList.get(event.getName());
+		enemy.addDamageGiven(event.getPower());
+	}
+
+
 	// computes the absolute bearing between two points
 	double absoluteBearing(double x1, double y1, double x2, double y2) {
 		double xo = x2-x1;
