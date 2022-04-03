@@ -16,6 +16,7 @@ public class EnemyRobot{
     private double scannedY;
     private double angle;
     private int threatLevel;
+    private double damageGiven;
     
     public EnemyRobot() {
 		this.bearing = 0.0;
@@ -30,6 +31,7 @@ public class EnemyRobot{
 		this.scannedY = 0;
 		this.angle = 0.0;
 		this.threatLevel = 0;
+		this.damageGiven = 0;
 	}
     
     public EnemyRobot(ScannedRobotEvent event, AdvancedRobot robot) {
@@ -142,6 +144,18 @@ public class EnemyRobot{
 		this.threatLevel = threatLevel;
 	}
 	
+	public double getDamageGiven() {
+		return this.damageGiven;
+	}
+	
+	public void setDamageGiven(double damageGiven) {
+		this.damageGiven = damageGiven;
+	}
+	
+	public void addDamageGiven(double newDamageGiven) {
+		this.damageGiven += newDamageGiven;
+	}
+	
 	public void setEnemyRobot(ScannedRobotEvent event, AdvancedRobot robot) {
 		this.heading = event.getHeading();
 		this.bearing = event.getBearing();
@@ -155,10 +169,12 @@ public class EnemyRobot{
 		this.scannedX = robot.getX() + Math.sin(angle) * event.getDistance();
 		this.scannedY = robot.getY() + Math.cos(angle) * event.getDistance();
 		this.threatLevel = evaluateThreatLevel(event);
+		
 	}
 	
 	private int evaluateThreatLevel(ScannedRobotEvent event) {
-		return 1 - (int)event.getDistance();
+		//return 1 - (int)event.getDistance(); //old evaluation using distance
+		return (int) this.getDamageGiven(); // new evaluation using damage given
 	}
 	
 	public double getFutureX(double x, long time) {

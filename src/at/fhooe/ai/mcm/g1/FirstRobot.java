@@ -3,6 +3,7 @@ import java.awt.geom.Point2D;
 import java.awt.*;
 
 import robocode.AdvancedRobot;
+import robocode.HitByBulletEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 
@@ -66,6 +67,8 @@ public class FirstRobot extends AdvancedRobot {
 		aim(highestThreat);
 	}
 	
+	
+	
 	public void aim(EnemyRobot robot) {
 //		aimWithoutPrediction(robot);
 		
@@ -113,7 +116,14 @@ public class FirstRobot extends AdvancedRobot {
 	public void onRobotDeath(RobotDeathEvent event) {
 		se.removeThreat(event.getName());
 	}
-	
+
+	@Override
+	public void onHitByBullet(HitByBulletEvent event) {
+		EnemyRobot enemy = se.threatList.get(event.getName());
+		enemy.addDamageGiven(event.getPower());
+	}
+
+
 	// computes the absolute bearing between two points
 	double absoluteBearing(double x1, double y1, double x2, double y2) {
 		double xo = x2-x1;
@@ -146,9 +156,26 @@ public class FirstRobot extends AdvancedRobot {
 		// if wall or robot is hit, we turn around
 		if (getVelocity() == 0) {
 			moveDirection *= -1;
+		} else if(se.getHighestThreat().getDistance() < 300) {
+			turnRight(se.getHighestThreat().getBearing() + 90);
+			//turnLeft(getGunHeading() + 90); // position the tank 90 degrees to gun heading
+			
+			if(getTime() % 4 == 0) {
+				moveDirection *= -1;
+			}
+		} else {
+			turnLeft(30);
 		}
-		ahead(100 * moveDirection);
-		turnLeft(30);
+		
+		long divisor = getTime() % 4 != 0 ? getTime() % 4 : 1;
+		
+		ahead((200 / divisor) * moveDirection);
+	}
+	
+	public void checkHighestThreatTurretHeading() {
+		EnemyRobot highestThreat = se.getHighestThreat();
+		
+		
 	}
 	
 	public void moveRadar() {
