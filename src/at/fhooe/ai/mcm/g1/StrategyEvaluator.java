@@ -28,5 +28,19 @@ public class StrategyEvaluator {
 	public void removeThreat(String robotName) {
 		threatList.remove(robotName);
 	}
-
+	
+	public double[] getMinMaxBearing() {
+		double minBearing = 180;
+		double maxBearing = -180;
+		for(EnemyRobot it: threatList.values()) {
+			if(minBearing > it.getBearing()) {
+				minBearing = it.getBearing();
+			}
+			if(maxBearing < it.getBearing()) {
+				maxBearing = it.getBearing();
+			}
+		}
+		return new double[] {minBearing, maxBearing};
+	}
+	
 }

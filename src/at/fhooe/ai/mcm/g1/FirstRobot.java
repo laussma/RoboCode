@@ -1,5 +1,6 @@
 package at.fhooe.ai.mcm.g1;
 import java.awt.geom.Point2D;
+import java.awt.*;
 
 import robocode.AdvancedRobot;
 import robocode.RobotDeathEvent;
@@ -10,6 +11,10 @@ public class FirstRobot extends AdvancedRobot {
 	StrategyEvaluator se = new StrategyEvaluator();
 	long fireTime = 0;
 	private byte moveDirection = 1;
+	private byte radarDirection = 1;
+	private static final double MAX_RADAR_TRACKING_AMOUNT = 360 / 4;
+	private long robotFoundTimestamp = 0;
+	private byte radarTurning = 0;
 	
 	@Override
 	public void run() {
@@ -30,14 +35,16 @@ public class FirstRobot extends AdvancedRobot {
 		
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
+		setBodyColor(new Color(128, 128, 50));
+        setGunColor(new Color(50, 50, 20));
+        setRadarColor(new Color(200, 200, 70));
+        setScanColor(Color.white);
+        setBulletColor(Color.blue);
 		setTurnRadarRight(Double.POSITIVE_INFINITY);
 		
-		/*if(getGunTurnRemaining() == 0) {
-			fire(1);
-		}*/
-
 		while(true) {
 			doMove();
+//			moveRadar();
 			//fire
 		}
 	}
@@ -46,8 +53,15 @@ public class FirstRobot extends AdvancedRobot {
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		se.updateThreatList(new EnemyRobot(event, this));
+		robotFoundTimestamp = getTime();
 		
 		EnemyRobot highestThreat = se.getHighestThreat();
+		
+		double bearing = highestThreat.getBearingRadians() + getHeadingRadians();
+		double latVel = highestThreat.getVelocity() * Math.sin(highestThreat.getHeadingRadians() - bearing);
+		setTurnRadarLeftRadians(getRadarTurnRemainingRadians());
+		
+		
 		fireGun(highestThreat);
 		aim(highestThreat);
 	}
@@ -135,5 +149,35 @@ public class FirstRobot extends AdvancedRobot {
 		}
 		ahead(100 * moveDirection);
 		turnLeft(30);
+	}
+	
+	public void moveRadar() {
+		// track robots inside a certain slice
+		// get min- and max-bearing
+		double[] minmax = se.getMinMaxBearing();
+		double minBearing = minmax[0];
+		double maxBearing = minmax[1];
+		double turner = robocode.util.Utils.normalRelativeAngleDegrees(minBearing + (getHeading() - getRadarHeading()));
+		System.out.println(getHeading());
+		System.out.println(getRadarHeading());
+		System.out.println(turner);
+		
+//		turner = nonZero(turner);
+//		turner += radarDirection * (MAX_RADAR_TRACKING_AMOUNT / 2);
+		setTurnRadarLeft(turner);
+		
+	}
+	
+	private double calcBearing(double radarHeading, double enemyBearing) {
+		double bearing = radarHeading + enemyBearing;
+		if(bearing < 0 ) bearing += 360;
+		return Math.toRadians(bearing);
+	}
+	
+	private double nonZero(double value) {
+		if (value < 0) {
+			return value * -1;
+		}
+		return value * -1;
 	}
 }
