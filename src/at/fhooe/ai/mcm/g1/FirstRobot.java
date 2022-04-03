@@ -47,11 +47,12 @@ public class FirstRobot extends AdvancedRobot {
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		se.updateThreatList(new EnemyRobot(event, this));
-		
 		EnemyRobot highestThreat = se.getHighestThreat();
 		fireGun(highestThreat);
 		aim(highestThreat);
 	}
+	
+	
 	
 	public void aim(EnemyRobot robot) {
 //		aimWithoutPrediction(robot);
@@ -140,8 +141,25 @@ public class FirstRobot extends AdvancedRobot {
 		// if wall or robot is hit, we turn around
 		if (getVelocity() == 0) {
 			moveDirection *= -1;
+		} else if(se.getHighestThreat().getDistance() < 300) {
+			turnRight(se.getHighestThreat().getBearing() + 90);
+			//turnLeft(getGunHeading() + 90); // position the tank 90 degrees to gun heading
+			
+			if(getTime() % 4 == 0) {
+				moveDirection *= -1;
+			}
+		} else {
+			turnLeft(30);
 		}
-		ahead(100 * moveDirection);
-		turnLeft(30);
+		
+		long divisor = getTime() % 4 != 0 ? getTime() % 4 : 1;
+		
+		ahead((200 / divisor) * moveDirection);
+	}
+	
+	public void checkHighestThreatTurretHeading() {
+		EnemyRobot highestThreat = se.getHighestThreat();
+		
+		
 	}
 }

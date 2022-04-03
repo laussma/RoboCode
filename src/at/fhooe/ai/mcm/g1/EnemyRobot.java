@@ -169,6 +169,7 @@ public class EnemyRobot{
 		this.scannedX = robot.getX() + Math.sin(angle) * event.getDistance();
 		this.scannedY = robot.getY() + Math.cos(angle) * event.getDistance();
 		this.threatLevel = evaluateThreatLevel(event);
+		
 	}
 	
 	private int evaluateThreatLevel(ScannedRobotEvent event) {
