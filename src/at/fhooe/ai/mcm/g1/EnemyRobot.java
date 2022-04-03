@@ -1,5 +1,6 @@
 package at.fhooe.ai.mcm.g1;
 
+import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 
 public class EnemyRobot{
@@ -11,8 +12,8 @@ public class EnemyRobot{
 	private double headingRadians;
 	private String name;
 	private double velocity;
-    private int scannedX;
-    private int scannedY;
+    private double scannedX;
+    private double scannedY;
     private double angle;
     private int threatLevel;
     
@@ -31,8 +32,8 @@ public class EnemyRobot{
 		this.threatLevel = 0;
 	}
     
-    public EnemyRobot(ScannedRobotEvent event, double X, double Y) {
-		setEnemyRobot(event, X, Y);
+    public EnemyRobot(ScannedRobotEvent event, AdvancedRobot robot) {
+		setEnemyRobot(event, robot);
 	}
 	
 	public double getBearing() {
@@ -121,7 +122,7 @@ public class EnemyRobot{
 		this.angle = angle;
 	}
 
-	public int getScannedX() {
+	public double getScannedX() {
 		return scannedX;
 	}
 
@@ -129,7 +130,7 @@ public class EnemyRobot{
 		this.scannedX = scannedX;
 	}
 
-	public int getScannedY() {
+	public double getScannedY() {
 		return scannedY;
 	}
 
@@ -141,23 +142,37 @@ public class EnemyRobot{
 		this.threatLevel = threatLevel;
 	}
 	
-	public void setEnemyRobot(ScannedRobotEvent event, double X, double Y) {
-		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
+	public void setEnemyRobot(ScannedRobotEvent event, AdvancedRobot robot) {
+		this.heading = event.getHeading();
 		this.bearing = event.getBearing();
 		this.bearingRadians = event.getBearingRadians();
 		this.distance = event.getDistance();
 		this.energy = event.getEnergy();
-		this.heading = event.getHeading();
 		this.headingRadians = event.getHeadingRadians();
 		this.name = event.getName();
 		this.velocity = event.getVelocity();
-		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
-		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
+		this.angle = calcBearing(robot.getHeading(), event.getBearing());
+		this.scannedX = robot.getX() + Math.sin(angle) * event.getDistance();
+		this.scannedY = robot.getY() + Math.cos(angle) * event.getDistance();
 		this.threatLevel = evaluateThreatLevel(event);
 	}
 	
 	private int evaluateThreatLevel(ScannedRobotEvent event) {
 		return 1 - (int)event.getDistance();
 	}
-
+	
+	public double getFutureX(double x, long time) {
+		return x + Math.sin(Math.toRadians(getHeading())) * getVelocity() * time;
+	}
+	
+	public double getFutureY(double y, long time) {
+		return y + Math.cos(Math.toRadians(getHeading())) * getVelocity() * time;
+	}
+	
+	private double calcBearing(double myHeading, double enemyBearing) {
+		double bearing = myHeading + enemyBearing;
+		if (bearing < 0) bearing += 360;
+		return Math.toRadians(bearing);
+	}
+	
 }
