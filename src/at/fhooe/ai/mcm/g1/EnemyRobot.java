@@ -11,6 +11,9 @@ public class EnemyRobot{
 	private double headingRadians;
 	private String name;
 	private double velocity;
+    private int scannedX;
+    private int scannedY;
+    private double angle;
 	
 	public double getBearing() {
 		return bearing;
@@ -76,7 +79,8 @@ public class EnemyRobot{
 	public String toString() {
 		return "EnemyRobot [bearing=" + bearing + ", bearingRadians=" + bearingRadians + ", distance=" + distance
 				+ ", energy=" + energy + ", heading=" + heading + ", headingRadians=" + headingRadians + ", name="
-				+ name + ", velocity=" + velocity + "]";
+				+ name + ", velocity=" + velocity + ", scannedX=" + scannedX + ", scannedY=" + scannedY + ", angle="
+				+ angle + "]";
 	}
 
 	public void setName(String name) {
@@ -92,9 +96,37 @@ public class EnemyRobot{
 		this.headingRadians = 0.0;
 		this.name = "";
 		this.velocity = 0.0;
+		this.scannedX = 0;
+		this.scannedY = 0;
+		this.angle = 0.0;
 	}
 	
-	public EnemyRobot(ScannedRobotEvent event) {
+	public double getAngle() {
+		return angle;
+	}
+
+	public void setAngle(double angle) {
+		this.angle = angle;
+	}
+
+	public int getScannedX() {
+		return scannedX;
+	}
+
+	public void setScannedX(int scannedX) {
+		this.scannedX = scannedX;
+	}
+
+	public int getScannedY() {
+		return scannedY;
+	}
+
+	public void setScannedY(int scannedY) {
+		this.scannedY = scannedY;
+	}
+	
+	public void setEnemyRobot(ScannedRobotEvent event, double X, double Y) {
+		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
 		this.bearing = event.getBearing();
 		this.bearingRadians = event.getBearingRadians();
 		this.distance = event.getDistance();
@@ -103,7 +135,22 @@ public class EnemyRobot{
 		this.headingRadians = event.getHeadingRadians();
 		this.name = event.getName();
 		this.velocity = event.getVelocity();
-		System.out.print(this.toString());
+		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
+		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
+	}
+
+	public EnemyRobot(ScannedRobotEvent event, double X, double Y) {
+		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
+		this.bearing = event.getBearing();
+		this.bearingRadians = event.getBearingRadians();
+		this.distance = event.getDistance();
+		this.energy = event.getEnergy();
+		this.heading = event.getHeading();
+		this.headingRadians = event.getHeadingRadians();
+		this.name = event.getName();
+		this.velocity = event.getVelocity();
+		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
+		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
 	}
 
 }
