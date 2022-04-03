@@ -14,6 +14,26 @@ public class EnemyRobot{
     private int scannedX;
     private int scannedY;
     private double angle;
+    private int threatLevel;
+    
+    public EnemyRobot() {
+		this.bearing = 0.0;
+		this.bearingRadians = 0.0;
+		this.distance = 0.0;
+		this.energy = 0.0;
+		this.heading = 0.0;
+		this.headingRadians = 0.0;
+		this.name = "";
+		this.velocity = 0.0;
+		this.scannedX = 0;
+		this.scannedY = 0;
+		this.angle = 0.0;
+		this.threatLevel = 0;
+	}
+    
+    public EnemyRobot(ScannedRobotEvent event, double X, double Y) {
+		setEnemyRobot(event, X, Y);
+	}
 	
 	public double getBearing() {
 		return bearing;
@@ -87,22 +107,14 @@ public class EnemyRobot{
 		this.name = name;
 	}
 
-	public EnemyRobot() {
-		this.bearing = 0.0;
-		this.bearingRadians = 0.0;
-		this.distance = 0.0;
-		this.energy = 0.0;
-		this.heading = 0.0;
-		this.headingRadians = 0.0;
-		this.name = "";
-		this.velocity = 0.0;
-		this.scannedX = 0;
-		this.scannedY = 0;
-		this.angle = 0.0;
-	}
+	
 	
 	public double getAngle() {
 		return angle;
+	}
+	
+	public int getThreatLevel() {
+		return threatLevel;
 	}
 
 	public void setAngle(double angle) {
@@ -125,6 +137,10 @@ public class EnemyRobot{
 		this.scannedY = scannedY;
 	}
 	
+	public void setThreatLevel(int threatLevel) {
+		this.threatLevel = threatLevel;
+	}
+	
 	public void setEnemyRobot(ScannedRobotEvent event, double X, double Y) {
 		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
 		this.bearing = event.getBearing();
@@ -137,20 +153,11 @@ public class EnemyRobot{
 		this.velocity = event.getVelocity();
 		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
 		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
+		this.threatLevel = evaluateThreatLevel(event);
 	}
-
-	public EnemyRobot(ScannedRobotEvent event, double X, double Y) {
-		this.angle = Math.toRadians((getHeading() + event.getBearing()) % 360);
-		this.bearing = event.getBearing();
-		this.bearingRadians = event.getBearingRadians();
-		this.distance = event.getDistance();
-		this.energy = event.getEnergy();
-		this.heading = event.getHeading();
-		this.headingRadians = event.getHeadingRadians();
-		this.name = event.getName();
-		this.velocity = event.getVelocity();
-		this.scannedX = (int)(X + Math.sin(angle) * event.getDistance());
-		this.scannedY = (int)(Y + Math.cos(angle) * event.getDistance());
+	
+	private int evaluateThreatLevel(ScannedRobotEvent event) {
+		return 1 - (int)event.getDistance();
 	}
 
 }

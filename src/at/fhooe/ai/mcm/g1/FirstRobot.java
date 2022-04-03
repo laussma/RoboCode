@@ -4,10 +4,14 @@ import java.util.Iterator;
 import java.awt.Color;
 
 import robocode.AdvancedRobot;
+import robocode.DeathEvent;
+import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 
 public class FirstRobot extends AdvancedRobot {
-	EnemyRobot r = new EnemyRobot();
+	
+	StrategyEvaluator se = new StrategyEvaluator();
+	long fireTime = 0;
 	
 	@Override
 	public void run() {
@@ -34,51 +38,60 @@ public class FirstRobot extends AdvancedRobot {
 		while(true) {
 			ahead(70);
 			turnLeft(30);
+			//fire
 		}
 	}
 
 	
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		EnemyRobot r1 = new EnemyRobot(event, getX(), getY());
-		double time = 1; // 1 tick
+		se.updateThreatList(new EnemyRobot(event, getX(), getY()));
 		
-		double distanceEnemyTurn = r1.getVelocity() * time;
+		EnemyRobot highestThreat = se.getHighestThreat();
+		evaluateShot(highestThreat);
+		aim(highestThreat);
 		
-		double XEnemyNew = r1.getScannedX() + Math.sin(r1.getAngle()) * distanceEnemyTurn;
-		double YEnemyNew = r1.getScannedY() + Math.cos(r1.getAngle()) * distanceEnemyTurn;
 		
-		double distanceBullet = Math.sqrt(Math.pow(XEnemyNew - getX(), 2) + Math.pow(YEnemyNew - getY(), 2));
-		
-		double angleBarrelRotation = Math.acos((XEnemyNew - getX()) / distanceBullet);
-		angleBarrelRotation += getHeadingRadians() - getGunHeadingRadians(); 
-		
-		double power = (distanceBullet / time - 20) / (-3);
-		
-		//super.onScannedRobot(event);
-		//this.r.setEnemyRobot(event, getX(), getY());
-		//System.out.println(angleBarrelRotation);
-		
-		if(getGunTurnRemaining() == 0) {
-			/*if(XEnemyNew - getX() > 0 && YEnemyNew - getY() > 0) {
-				turnGunLeftRadians(angleBarrelRotation);
-			} else if(XEnemyNew - getX() > 0 && YEnemyNew - getY() < 0) {
-				turnGunRightRadians(angleBarrelRotation);
-			} else if(XEnemyNew - getX() < 0 && YEnemyNew - getY() > 0) {
-				turnGunRightRadians(angleBarrelRotation);
-			} else {
-				turnGunLeftRadians(angleBarrelRotation);
-			}*/
-			
-			turnGunLeftRadians(angleBarrelRotation);
-			
-			fire(power);
-		}
-		
+//		
+//		EnemyRobot r1 = new EnemyRobot(event, getX(), getY());
+//		double time = 1; // 1 tick
+//		
+//		double distanceEnemyTurn = r1.getVelocity() * time;
+//		
+//		double XEnemyNew = r1.getScannedX() + Math.sin(r1.getAngle()) * distanceEnemyTurn;
+//		double YEnemyNew = r1.getScannedY() + Math.cos(r1.getAngle()) * distanceEnemyTurn;
+//		
+//		double distanceBullet = Math.sqrt(Math.pow(XEnemyNew - getX(), 2) + Math.pow(YEnemyNew - getY(), 2));
+//		
+//		double angleBarrelRotation = Math.acos((XEnemyNew - getX()) / distanceBullet);
+//		angleBarrelRotation += getHeadingRadians() - getGunHeadingRadians(); 
+//		
+//		double power = (distanceBullet / time - 20) / (-3);
+//		
+//		//super.onScannedRobot(event);
+//		//this.r.setEnemyRobot(event, getX(), getY()); 
+//		//System.out.println(angleBarrelRotation);
+//		
+//		
+//	
+//		 //might change it to not always use left rotation
+//		//fire(power);
+//		//execute();
+	}
 	
-		 //might change it to not always use left rotation
-		//fire(power);
-		//execute();
+	public void aim(EnemyRobot robot) {
+		double absoluteBearing = getHeadingRadians() + robot.getBearingRadians();
+				
+		setTurnGunRightRadians(
+		    robocode.util.Utils.normalRelativeAngle(absoluteBearing - 
+		        getGunHeadingRadians()));
+		fireTime = getTime() + 1;
+	}
+	
+	public void evaluateShot(EnemyRobot robot) {
+		if(fireTime == getTime() && getGunTurnRemaining() == 0) {
+			fire(1);
+		}
 	}
 	
 	public double[] calcDistances(double BFHeight, double BFWidth, double X, double Y) {
@@ -86,13 +99,9 @@ public class FirstRobot extends AdvancedRobot {
 		double distances[] = {BFHeight - Y, BFWidth- X, Y, X};
 		return distances;
 	}
-	public void onPaint(java.awt.Graphics2D g) {
-		g.setColor(new Color(0xff, 0x00, 0x00, 0x80));
-
-	    // Draw a line from our robot to the scanned robot
-	    g.drawLine(r.getScannedX(), r.getScannedY(), (int)getX(), (int)getY());
-
-	    // Draw a filled square on top of the scanned robot that covers it
-	    g.fillRect(r.getScannedX() - 20, r.getScannedY() - 20, 40, 40);
-	};
+	
+	@Override
+	public void onRobotDeath(RobotDeathEvent event) {
+		se.removeThreat(event.getName());
+	}
 }
