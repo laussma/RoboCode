@@ -1,14 +1,7 @@
 package at.fhooe.ai.mcm.g1;
-
-import java.util.Iterator;
-
-import javax.security.auth.x500.X500Principal;
-
-import java.awt.Color;
 import java.awt.geom.Point2D;
 
 import robocode.AdvancedRobot;
-import robocode.DeathEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 
@@ -16,6 +9,7 @@ public class FirstRobot extends AdvancedRobot {
 	
 	StrategyEvaluator se = new StrategyEvaluator();
 	long fireTime = 0;
+	private byte moveDirection = 1;
 	
 	@Override
 	public void run() {
@@ -43,8 +37,7 @@ public class FirstRobot extends AdvancedRobot {
 		}*/
 
 		while(true) {
-			ahead(70);
-			turnLeft(30);
+			doMove();
 			//fire
 		}
 	}
@@ -81,7 +74,6 @@ public class FirstRobot extends AdvancedRobot {
 		
 		setTurnGunRight(normalizeBearing(absDeg - getGunHeading()));
 	}
-
 
 	private void aimWithoutPrediction(EnemyRobot robot) {
 		// Calculation of angle to aim at enemy
@@ -136,4 +128,12 @@ public class FirstRobot extends AdvancedRobot {
 		return angle;
 	}
 	
+	public void doMove() {
+		// if wall or robot is hit, we turn around
+		if (getVelocity() == 0) {
+			moveDirection *= -1;
+		}
+		ahead(100 * moveDirection);
+		turnLeft(30);
+	}
 }
