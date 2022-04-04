@@ -3,6 +3,7 @@ package at.fhooe.ai.mcm.g1;
 import java.util.HashMap;
 
 public class StrategyEvaluator {
+	private boolean initialScanFinished = false;
 	HashMap<String, EnemyRobot> threatList;
 	public StrategyEvaluator() {
 		threatList = new HashMap<>();
@@ -41,6 +42,18 @@ public class StrategyEvaluator {
 			}
 		}
 		return new double[] {minBearing, maxBearing};
+	}
+	
+	public int getThreatCount() {
+		return threatList.size();
+	}
+	
+	public void setInitialScanFinished() {
+		initialScanFinished = true;
+	}
+	
+	public boolean isInitialScanFinished() {
+		return initialScanFinished;
 	}
 	
 }

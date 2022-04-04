@@ -41,12 +41,10 @@ public class FirstRobot extends AdvancedRobot {
         setRadarColor(new Color(200, 200, 70));
         setScanColor(Color.white);
         setBulletColor(Color.blue);
-		setTurnRadarRight(Double.POSITIVE_INFINITY);
+		setTurnRadarRight(360);
 		
 		while(true) {
 			doMove();
-//			moveRadar();
-			//fire
 		}
 	}
 
@@ -57,12 +55,7 @@ public class FirstRobot extends AdvancedRobot {
 		robotFoundTimestamp = getTime();
 		
 		EnemyRobot highestThreat = se.getHighestThreat();
-		
-		double bearing = highestThreat.getBearingRadians() + getHeadingRadians();
-		double latVel = highestThreat.getVelocity() * Math.sin(highestThreat.getHeadingRadians() - bearing);
-		setTurnRadarLeftRadians(getRadarTurnRemainingRadians());
-		
-		
+		moveRadar();
 		fireGun(highestThreat);
 		aim(highestThreat);
 	}
@@ -179,32 +172,19 @@ public class FirstRobot extends AdvancedRobot {
 	}
 	
 	public void moveRadar() {
-		// track robots inside a certain slice
-		// get min- and max-bearing
-		double[] minmax = se.getMinMaxBearing();
-		double minBearing = minmax[0];
-		double maxBearing = minmax[1];
-		double turner = robocode.util.Utils.normalRelativeAngleDegrees(minBearing + (getHeading() - getRadarHeading()));
-		System.out.println(getHeading());
-		System.out.println(getRadarHeading());
-		System.out.println(turner);
-		
-//		turner = nonZero(turner);
-//		turner += radarDirection * (MAX_RADAR_TRACKING_AMOUNT / 2);
-		setTurnRadarLeft(turner);
-		
-	}
-	
-	private double calcBearing(double radarHeading, double enemyBearing) {
-		double bearing = radarHeading + enemyBearing;
-		if(bearing < 0 ) bearing += 360;
-		return Math.toRadians(bearing);
-	}
-	
-	private double nonZero(double value) {
-		if (value < 0) {
-			return value * -1;
+		// is the initial scan (360 deg) already finished?
+		if (getRadarTurnRemaining() == 0) {
+			se.setInitialScanFinished();
+			setTurnRadarRight(Double.POSITIVE_INFINITY);
 		}
-		return value * -1;
+		// it's not a 1v1? keep rotating the radar 360 deg
+		if(se.getThreatCount() != 1) {
+			return;
+		}
+		// if we are in a 1v1 we track the enemy
+		if(se.isInitialScanFinished()) {
+			setTurnRadarLeft(getRadarTurnRemaining());
+		}
+		
 	}
 }
