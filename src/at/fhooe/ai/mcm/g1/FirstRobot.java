@@ -1,11 +1,13 @@
 package at.fhooe.ai.mcm.g1;
 import java.awt.geom.Point2D;
+import java.util.Iterator;
 import java.awt.*;
 
 import robocode.AdvancedRobot;
 import robocode.HitByBulletEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
+import robocode.WinEvent;
 
 public class FirstRobot extends AdvancedRobot {
 	
@@ -16,6 +18,8 @@ public class FirstRobot extends AdvancedRobot {
 	private static final double MAX_RADAR_TRACKING_AMOUNT = 360 / 4;
 	private long robotFoundTimestamp = 0;
 	private byte radarTurning = 0;
+	private double firePower = 1;
+	private int freezeTime = 3;
 	
 	@Override
 	public void run() {
@@ -41,7 +45,7 @@ public class FirstRobot extends AdvancedRobot {
         setRadarColor(new Color(200, 200, 70));
         setScanColor(Color.white);
         setBulletColor(Color.blue);
-		setTurnRadarRight(360);
+		setTurnRadarRight(Double.POSITIVE_INFINITY);
 		
 		while(true) {
 			doMove();
@@ -72,7 +76,7 @@ public class FirstRobot extends AdvancedRobot {
 
 	private void aimWithTargetPrediction(EnemyRobot robot) {
 		// firepower is based on the distance
-		double firePower = Math.min(500 / robot.getDistance(), 3);
+		firePower = Math.min(500 / robot.getDistance(), 3);
 		// calculate the speed of the bullet
 		double bulletSpeed = 20 - firePower * 3;
 		long time = (long)(robot.getDistance() / bulletSpeed);
@@ -95,7 +99,7 @@ public class FirstRobot extends AdvancedRobot {
 	
 	public void fireGun(EnemyRobot robot) {
 		if(fireTime == getTime() && getGunTurnRemaining() == 0) {
-			fire(1);
+			fire(firePower);
 		}
 	}
 	
@@ -172,19 +176,18 @@ public class FirstRobot extends AdvancedRobot {
 	}
 	
 	public void moveRadar() {
-		// is the initial scan (360 deg) already finished?
-		if (getRadarTurnRemaining() == 0) {
-			se.setInitialScanFinished();
-			setTurnRadarRight(Double.POSITIVE_INFINITY);
-		}
-		// it's not a 1v1? keep rotating the radar 360 deg
-		if(se.getThreatCount() != 1) {
-			return;
-		}
-		// if we are in a 1v1 we track the enemy
-		if(se.isInitialScanFinished()) {
+		if (getOthers() == 1) {
 			setTurnRadarLeft(getRadarTurnRemaining());
 		}
-		
+	}
+	
+	@Override
+	public void onWin(WinEvent event) {
+		stop(true);
+		for (int i = 0; i < 50; i++) {
+			turnRight(30);
+			turnLeft(30);
+		}
+		resume();
 	}
 }
