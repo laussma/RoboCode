@@ -1,6 +1,5 @@
 package at.fhooe.ai.mcm.g1;
 import java.awt.geom.Point2D;
-import java.util.Iterator;
 import java.awt.*;
 
 import robocode.AdvancedRobot;
@@ -17,29 +16,17 @@ public class Thanos extends AdvancedRobot {
 	StrategyEvaluator se = new StrategyEvaluator();
 	long fireTime = 0;
 	private byte moveDirection = 1;
-	private byte radarDirection = 1;
-	private static final double MAX_RADAR_TRACKING_AMOUNT = 360 / 4;
-	private long robotFoundTimestamp = 0;
-	private byte radarTurning = 0;
 	private double firePower = 1;
-	private int freezeTime = 3;
+	private double BFHeight = 0;
+	private double BFWidth = 0;
+	private double distance_top = 0;
+	private double distance_right = 0;
+	private double distance_bottom = 0;
+	private double distance_left = 0;
+	
 	
 	@Override
 	public void run() {
-		
-		double BFHeight = getBattleFieldHeight();
-		double BFWidth = getBattleFieldWidth();
-		
-		System.out.println("BFHeight: " + BFHeight);
-		System.out.println("BFWidth: " + BFWidth);
-
-		double rotation = getHeading();
-
-
-		double X = getX();
-		double Y = getY();
-		
-		double distances[] = calcDistances(BFHeight, BFWidth, X, Y);
 		
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -50,6 +37,9 @@ public class Thanos extends AdvancedRobot {
         setBulletColor(Color.blue);
 		setTurnRadarRight(Double.POSITIVE_INFINITY);
 		
+		BFHeight = getBattleFieldHeight();
+		BFWidth = getBattleFieldWidth();
+		
 		while(true) {
 			doMove();
 		}
@@ -59,7 +49,6 @@ public class Thanos extends AdvancedRobot {
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		se.updateThreatList(new EnemyRobot(event, this));
-		robotFoundTimestamp = getTime();
 		
 		EnemyRobot highestThreat = se.getHighestThreat();
 		moveRadar();
@@ -106,10 +95,14 @@ public class Thanos extends AdvancedRobot {
 		}
 	}
 	
-	public double[] calcDistances(double BFHeight, double BFWidth, double X, double Y) {
+	public void calcDistances() {
+		double X = getX();
+		double Y = getY();
 		// distances in order: Top, Right, Bottom, Left
-		double distances[] = {BFHeight - Y, BFWidth- X, Y, X};
-		return distances;
+		distance_top = BFHeight - Y;
+		distance_right = BFWidth- X;
+		distance_bottom = Y;
+		distance_left =  X;
 	}
 	
 	@Override
@@ -153,6 +146,7 @@ public class Thanos extends AdvancedRobot {
 	}
 	
 	public void doMove() {
+		wallAvoidance();
 		// if wall or robot is hit, we turn around
 		if (getVelocity() == 0) {
 			moveDirection *= -1;
@@ -169,7 +163,7 @@ public class Thanos extends AdvancedRobot {
 		
 		long divisor = getTime() % 4 != 0 ? getTime() % 4 : 1;
 		
-		ahead((200 / divisor) * moveDirection);
+		ahead((100 / divisor) * moveDirection);
 	}
 	
 	public void checkHighestThreatTurretHeading() {
@@ -192,5 +186,48 @@ public class Thanos extends AdvancedRobot {
 			turnLeft(30);
 		}
 		resume();
+	}
+	
+	public void wallAvoidance() {
+		double redzoneFactor = 0.1;
+		int turnDirection = 1;
+		calcDistances();
+		double heading = getHeading();
+		if(distance_top < BFHeight * redzoneFactor) {
+			if(270 < heading && heading < 360) {
+				turnDirection = -1;
+			} else {
+				turnDirection = 1;
+			}
+			double turnAngle = calcTurnAngle(distance_top, BFHeight * redzoneFactor);
+			turnRight(turnAngle * turnDirection);
+			ahead(100);
+		}
+		if(distance_right < BFWidth * redzoneFactor) {
+			turnDirection = (int)(90 - heading);
+			turnDirection = (int)turnDirection/turnDirection;
+			double turnAngle = calcTurnAngle(distance_right, BFWidth * redzoneFactor);
+			turnRight(turnAngle * turnDirection);
+			ahead(100);
+		}
+		if(distance_bottom < BFHeight * redzoneFactor) {
+			turnDirection = (int)(90-heading);
+			turnDirection = (int)turnDirection/turnDirection;
+			double turnAngle = calcTurnAngle(distance_bottom, BFHeight * redzoneFactor);
+			turnRight(turnAngle * turnDirection);
+			ahead(100);
+		}
+		if(distance_left < BFWidth * redzoneFactor) {
+			turnDirection = (int)(90-heading);
+			turnDirection = (int)turnDirection/turnDirection;
+			double turnAngle = calcTurnAngle(distance_left, BFWidth * redzoneFactor);
+			turnRight(turnAngle * turnDirection);
+			ahead(100);
+		}
+	}
+	
+	public double calcTurnAngle(double distance, double redzone) {
+		int maxAngle = 90;
+		return maxAngle - (redzone - distance)/redzone * maxAngle;
 	}
 }

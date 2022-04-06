@@ -1,5 +1,7 @@
 package at.fhooe.ai.mcm.g1;
 
+import org.w3c.dom.events.EventTarget;
+
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 
