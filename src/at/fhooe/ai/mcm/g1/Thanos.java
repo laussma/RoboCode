@@ -9,7 +9,10 @@ import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 import robocode.WinEvent;
 
-public class FirstRobot extends AdvancedRobot {
+/*
+ * Fighting Robot of Group1 of the AI course project
+ */
+public class Thanos extends AdvancedRobot {
 	
 	StrategyEvaluator se = new StrategyEvaluator();
 	long fireTime = 0;
